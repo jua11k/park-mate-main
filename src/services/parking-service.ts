@@ -2,6 +2,7 @@ import { db } from "@/db";
 import { vehicles, insertVehicleSchema } from "@/db/schema/vehicles";
 import { parkingRecords, insertRecordSchema } from "@/db/schema/records";
 import { eq, and, desc } from "drizzle-orm";
+import { sendToN8n } from "./n8n-service";
 
 export async function getParkedVehicles(tenantId: string) {
   return await db.query.parkingRecords.findMany({
@@ -34,12 +35,14 @@ export async function registerEntry(tenantId: string, data: { placa: string, tip
     vehicle = newVehicle;
   }
 
-  // 2. Create parking record
-  return await db.insert(parkingRecords).values({
+  // 3. Notify n8n
+  sendToN8n({
     tenantId,
-    vehicleId: vehicle.id,
-    status: "parked",
-  }).returning();
+    eventType: "parking.entry",
+    data: { vehicle, record: result[0] },
+  });
+
+  return result;
 }
 
 export async function registerExit(tenantId: string, placa: string) {
@@ -57,11 +60,20 @@ export async function registerExit(tenantId: string, placa: string) {
 
   if (!record) throw new Error("Vehículo no encontrado o no está parqueado");
 
-  return await db.update(parkingRecords)
+  const result = await db.update(parkingRecords)
     .set({
       status: "completed",
       exitTime: new Date(),
     })
     .where(eq(parkingRecords.id, record.id))
     .returning();
+
+  // Notify n8n
+  sendToN8n({
+    tenantId,
+    eventType: "parking.exit",
+    data: { vehicle: record.vehicle, record: result[0] },
+  });
+
+  return result;
 }
