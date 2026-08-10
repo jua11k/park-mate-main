@@ -41,6 +41,18 @@ export const Header = ({ vehicleCount, tenantName }: HeaderProps) => {
               </Link>
             </Button>
             <Button variant="ghost" asChild className="rounded-full gap-2 font-semibold">
+              <Link href="/reports">
+                <RefreshCw className="h-4 w-4" />
+                Reportes
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild className="rounded-full gap-2 font-semibold">
+              <Link href="/customers">
+                <Car className="h-4 w-4" />
+                Clientes
+              </Link>
+            </Button>
+            <Button variant="ghost" asChild className="rounded-full gap-2 font-semibold">
               <Link href="/memberships">
                 <Calendar className="h-4 w-4" />
                 Convenios

@@ -1,11 +1,12 @@
 import { getSession } from "@/actions/auth-actions";
 import { redirect, notFound } from "next/navigation";
 import { Header } from "@/components/Header";
-import { getSubscriptions, getParkedVehicles } from "@/services/parking-service";
+import { getSubscriptions, getParkedVehicles, getParkingPlans, getAllVehicles } from "@/services/parking-service";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, CreditCard, Plus } from "lucide-react";
+import { NewMembershipButton } from "@/components/NewMembershipButton";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -16,9 +17,11 @@ export default async function MembershipsPage() {
     redirect("/login");
   }
 
-  const [subs, parked] = await Promise.all([
+  const [subs, parked, plans, vehicles] = await Promise.all([
     getSubscriptions(session.tenantId),
-    getParkedVehicles(session.tenantId)
+    getParkedVehicles(session.tenantId),
+    getParkingPlans(session.tenantId),
+    getAllVehicles(session.tenantId)
   ]);
 
   return (
@@ -34,10 +37,7 @@ export default async function MembershipsPage() {
             <h2 className="text-3xl font-bold tracking-tight">Gestión de Convenios</h2>
             <p className="text-muted-foreground">Administra los planes mensuales y suscripciones activas.</p>
           </div>
-          <Button className="h-12 rounded-xl font-bold gap-2">
-            <Plus className="h-5 w-5" />
-            Nuevo Convenio
-          </Button>
+          <NewMembershipButton tenantId={session.tenantId} plans={plans} vehicles={vehicles} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

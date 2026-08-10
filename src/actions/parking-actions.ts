@@ -89,3 +89,49 @@ export async function getSubscriptionsAction(tenantId: string) {
     return { success: false, error: "Error al cargar convenios" };
   }
 }
+
+export async function createPlanAction(tenantId: string, formData: FormData): Promise<ActionResponse<any>> {
+  const data = {
+    name: formData.get("name") as string,
+    description: formData.get("description") as string,
+    type: formData.get("type") as string,
+    price: formData.get("price") as string,
+  };
+
+  if (!data.name || !data.type || !data.price) {
+    return { success: false, error: "Faltan datos obligatorios" };
+  }
+
+  try {
+    const { createPlan } = await import("@/services/parking-service");
+    const plan = await createPlan(tenantId, data);
+    revalidatePath("/plans");
+    return { success: true, data: plan };
+  } catch (e) {
+    return { success: false, error: "Error al crear la tarifa" };
+  }
+}
+
+export async function createMembershipAction(tenantId: string, formData: FormData): Promise<ActionResponse<any>> {
+  const data = {
+    vehicleId: formData.get("vehicleId") as string,
+    planId: formData.get("planId") as string,
+    startDate: new Date(formData.get("startDate") as string),
+    endDate: new Date(formData.get("endDate") as string),
+    totalPaid: formData.get("totalPaid") as string,
+  };
+
+  if (!data.vehicleId || !data.planId || !data.startDate || !data.endDate || !data.totalPaid) {
+    return { success: false, error: "Faltan datos obligatorios" };
+  }
+
+  try {
+    const { createSubscription } = await import("@/services/parking-service");
+    const sub = await createSubscription(tenantId, data);
+    revalidatePath("/memberships");
+    return { success: true, data: sub };
+  } catch (e) {
+    return { success: false, error: "Error al crear el convenio" };
+  }
+}
+

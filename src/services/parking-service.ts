@@ -245,3 +245,49 @@ export async function getSubscriptions(tenantId: string) {
     orderBy: [desc(subscriptions.createdAt)],
   });
 }
+
+export async function getAllVehicles(tenantId: string) {
+  return await db.query.vehicles.findMany({
+    where: eq(vehicles.tenantId, tenantId),
+    orderBy: [desc(vehicles.createdAt)],
+  });
+}
+
+export async function createPlan(tenantId: string, data: { name: string, description: string, type: string, price: string }) {
+  const [plan] = await db.insert(parkingPlans).values({
+    tenantId,
+    name: data.name,
+    description: data.description,
+    type: data.type,
+    price: data.price,
+  }).returning();
+  return plan;
+}
+
+export async function createSubscription(tenantId: string, data: { vehicleId: string, planId: string, startDate: Date, endDate: Date, totalPaid: string }) {
+  const [sub] = await db.insert(subscriptions).values({
+    tenantId,
+    vehicleId: data.vehicleId,
+    planId: data.planId,
+    startDate: data.startDate,
+    endDate: data.endDate,
+    status: 'active',
+    totalPaid: data.totalPaid,
+  }).returning();
+  return sub;
+}
+
+export async function getCompletedRecords(tenantId: string) {
+  return await db.query.parkingRecords.findMany({
+    where: and(
+      eq(parkingRecords.tenantId, tenantId),
+      eq(parkingRecords.status, "completed")
+    ),
+    with: {
+      vehicle: true,
+      plan: true,
+    },
+    orderBy: [desc(parkingRecords.exitTime)],
+    limit: 100,
+  });
+}

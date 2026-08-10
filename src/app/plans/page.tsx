@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Settings, Plus, DollarSign, Clock } from "lucide-react";
+import { NewPlanButton } from "@/components/NewPlanButton";
 
 export default async function PlansPage() {
   const session = await getSession();
@@ -32,10 +33,7 @@ export default async function PlansPage() {
             <h2 className="text-3xl font-bold tracking-tight">Tarifas y Planes</h2>
             <p className="text-muted-foreground">Configura los precios por hora, día o planes especiales.</p>
           </div>
-          <Button className="h-12 rounded-xl font-bold gap-2">
-            <Plus className="h-5 w-5" />
-            Nueva Tarifa
-          </Button>
+          <NewPlanButton tenantId={session.tenantId} />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
