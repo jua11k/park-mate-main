@@ -234,3 +234,14 @@ function calculateAmount(entry: Date, exit: Date, priceStr: string, type: string
   const hoursToCharge = Math.ceil(diffHours);
   return (Math.max(1, hoursToCharge) * price).toFixed(2);
 }
+
+export async function getSubscriptions(tenantId: string) {
+  return await db.query.subscriptions.findMany({
+    where: eq(subscriptions.tenantId, tenantId),
+    with: {
+      vehicle: true,
+      plan: true,
+    },
+    orderBy: [desc(subscriptions.createdAt)],
+  });
+}
