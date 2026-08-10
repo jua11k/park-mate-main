@@ -2,6 +2,7 @@ import { pgSchema, uuid, varchar, text, timestamp, uniqueIndex } from "drizzle-o
 import { tenants } from "./tenants";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
+import { relations } from "drizzle-orm";
 
 export const parkMateSchema = pgSchema("park_mate");
 
@@ -23,3 +24,10 @@ export const insertUserSchema = createInsertSchema(users);
 export const selectUserSchema = createSelectSchema(users);
 export type User = typeof users.$inferSelect;
 export type NewUser = z.infer<typeof insertUserSchema>;
+
+export const usersRelations = relations(users, ({ one }) => ({
+  tenant: one(tenants, {
+    fields: [users.tenantId],
+    references: [tenants.id],
+  }),
+}));
