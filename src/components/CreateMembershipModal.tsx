@@ -4,7 +4,6 @@ import { useState, useTransition } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { createMembershipAction } from "@/actions/parking-actions";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
@@ -39,7 +38,7 @@ export function CreateMembershipModal({ open, onOpenChange, tenantId, plans, veh
         <form onSubmit={handleSubmit} className="space-y-6 mt-4">
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Vehículo (Placa)</Label>
+              <label className="text-sm font-medium">Vehículo (Placa)</label>
               <select name="vehicleId" required className="w-full h-10 px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm outline-none focus:border-primary/50 text-white">
                 <option value="" className="bg-black text-white">Seleccione un vehículo</option>
                 {vehicles.map(v => (
@@ -51,7 +50,7 @@ export function CreateMembershipModal({ open, onOpenChange, tenantId, plans, veh
             </div>
 
             <div className="space-y-2">
-              <Label>Plan Asociado</Label>
+              <label className="text-sm font-medium">Plan Asociado</label>
               <select name="planId" required className="w-full h-10 px-3 py-2 bg-white/5 border border-white/10 rounded-md text-sm outline-none focus:border-primary/50 text-white">
                 <option value="" className="bg-black text-white">Seleccione un plan</option>
                 {plans.map(p => (
@@ -64,17 +63,17 @@ export function CreateMembershipModal({ open, onOpenChange, tenantId, plans, veh
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label>Fecha de Inicio</Label>
+                <label className="text-sm font-medium">Fecha de Inicio</label>
                 <Input name="startDate" type="datetime-local" required className="bg-white/5 border-white/10" />
               </div>
               <div className="space-y-2">
-                <Label>Fecha de Fin</Label>
+                <label className="text-sm font-medium">Fecha de Fin</label>
                 <Input name="endDate" type="datetime-local" required className="bg-white/5 border-white/10" />
               </div>
             </div>
 
             <div className="space-y-2">
-              <Label>Total Pagado ($)</Label>
+              <label className="text-sm font-medium">Total Pagado ($)</label>
               <Input name="totalPaid" type="number" step="0.01" required placeholder="Ej: 50000" className="bg-white/5 border-white/10" />
             </div>
           </div>
