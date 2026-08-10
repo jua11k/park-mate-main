@@ -16,9 +16,9 @@ export async function getParkedVehicles(tenantId: string) {
       vehicle: {
         with: {
           subscriptions: {
-            where: and(
-              eq(subscriptions.status, "active"),
-              gt(subscriptions.endDate, new Date())
+            where: (subs, { eq, and, gt }) => and(
+              eq(subs.status, "active"),
+              gt(subs.endDate, new Date())
             ),
             limit: 1
           }
