@@ -6,9 +6,11 @@ import { tenants } from "@/db/schema/tenants";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 
-export default async function TenantPage({ params }: { params: { tenant_slug: string } }) {
+export default async function TenantPage({ params }: { params: Promise<{ tenant_slug: string }> }) {
+  const { tenant_slug } = await params;
+  
   const tenant = await db.query.tenants.findFirst({
-    where: eq(tenants.slug, params.tenant_slug),
+    where: eq(tenants.slug, tenant_slug),
   });
 
   if (!tenant) {
@@ -22,6 +24,7 @@ export default async function TenantPage({ params }: { params: { tenant_slug: st
       <Header 
         vehicleCount={vehicles.length}
         tenantName={tenant.name}
+        tenantSlug={tenant_slug}
       />
 
       <DashboardClient 

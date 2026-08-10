@@ -1,14 +1,19 @@
-import { pgTable, uuid, varchar, text, jsonb, timestamp } from "drizzle-orm/pg-core";
+import { pgSchema, uuid, varchar, jsonb, timestamp, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const tenants = pgTable("tenants", {
+export const parkMateSchema = pgSchema("park_mate");
+
+export const tenants = parkMateSchema.table("tenants", {
   id: uuid("id").primaryKey().defaultRandom(),
   name: varchar("name", { length: 255 }).notNull(),
   slug: varchar("slug", { length: 100 }).notNull().unique(),
   config: jsonb("config").default({}).notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  active: boolean("active").default(true),
+  status: varchar("status", { length: 50 }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  deletedAt: timestamp("deleted_at", { withTimezone: true }),
 });
 
 export const insertTenantSchema = createInsertSchema(tenants);
