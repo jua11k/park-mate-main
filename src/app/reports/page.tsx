@@ -44,7 +44,7 @@ export default async function ReportsPage(props: { searchParams: Promise<{ planI
             <h2 className="text-3xl font-bold tracking-tight">Métricas y Reportes</h2>
             <p className="text-muted-foreground">Resumen financiero e historial de parqueo.</p>
           </div>
-          <div className="flex gap-2 items-center">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
             <ReportFilter plans={plans} currentPlanId={currentPlanId} />
             <ExportCsvButton records={records} />
           </div>

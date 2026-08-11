@@ -20,12 +20,12 @@ export function ReportFilter({ plans, currentPlanId }: { plans: any[], currentPl
   };
 
   return (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row sm:items-center gap-2 w-full">
       <span className="text-sm font-medium text-muted-foreground whitespace-nowrap hidden sm:inline-block">Filtrar Convenio:</span>
       <select 
         value={currentPlanId} 
         onChange={handleFilterChange}
-        className="h-12 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm outline-none focus:border-primary/50 text-white min-w-[200px]"
+        className="w-full sm:w-auto h-12 px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-sm outline-none focus:border-primary/50 text-white min-w-[200px]"
       >
         <option value="" className="bg-black text-white">Todos los registros</option>
         <option value="none" className="bg-black text-white">Tarifa Estándar (Sin convenio)</option>

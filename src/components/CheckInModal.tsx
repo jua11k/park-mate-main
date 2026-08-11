@@ -137,7 +137,7 @@ export function CheckInModal({ open, onOpenChange, tenantId }: CheckInModalProps
             </div>
           )}
           
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <label className="text-sm font-medium">Tipo</label>
               <Select name="tipo" value={ownerData.tipo} onValueChange={(v) => setOwnerData({...ownerData, tipo: v})}>

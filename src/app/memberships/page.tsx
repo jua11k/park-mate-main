@@ -38,9 +38,13 @@ export default async function MembershipsPage() {
             <h2 className="text-3xl font-bold tracking-tight">Gestión de Convenios</h2>
             <p className="text-muted-foreground">Administra los planes mensuales y suscripciones activas.</p>
           </div>
-          <div className="flex items-center gap-2">
-            <ImportCsvButton tenantId={session.tenantId} plans={plans} />
-            <NewMembershipButton tenantId={session.tenantId} plans={plans} vehicles={vehicles} />
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
+            <div className="w-full sm:w-auto">
+              <ImportCsvButton tenantId={session.tenantId} plans={plans} />
+            </div>
+            <div className="w-full sm:w-auto">
+              <NewMembershipButton tenantId={session.tenantId} plans={plans} vehicles={vehicles} />
+            </div>
           </div>
         </div>
 

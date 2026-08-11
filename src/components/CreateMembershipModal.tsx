@@ -112,7 +112,7 @@ export function CreateMembershipModal({ open, onOpenChange, tenantId, plans, veh
               </select>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                <div className="space-y-2">
                  <label className="text-sm font-medium">Tipo de Mensualidad</label>
                  <select 
@@ -134,7 +134,7 @@ export function CreateMembershipModal({ open, onOpenChange, tenantId, plans, veh
                </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/10">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/10">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Inicia</label>
                 <Input 
