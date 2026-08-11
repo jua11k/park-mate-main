@@ -64,10 +64,14 @@ export async function registerExitAction(tenantId: string, placa: string): Promi
 
 export async function getVehicleInfoAction(tenantId: string, placa: string) {
   try {
+    const { getVehicleByPlaca, getActiveSubscription } = await import("@/services/parking-service");
     const vehicle = await getVehicleByPlaca(tenantId, placa);
-    return { success: true, data: vehicle };
+    if (!vehicle) return { success: true, data: null };
+    
+    const activeSub = await getActiveSubscription(tenantId, vehicle.id);
+    return { success: true, data: { ...vehicle, activeSubscription: activeSub } };
   } catch (e) {
-    return { success: false, error: "Vehículo no encontrado" };
+    return { success: false, error: "Error al buscar vehículo" };
   }
 }
 

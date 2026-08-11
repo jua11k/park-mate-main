@@ -20,6 +20,7 @@ export function CheckInModal({ open, onOpenChange, tenantId }: CheckInModalProps
   const [isSearching, setIsSearching] = useState(false);
   const [placa, setPlaca] = useState("");
   const [plans, setPlans] = useState<any[]>([]);
+  const [activeSub, setActiveSub] = useState<any>(null);
   
   const [state, formAction, isPending] = useActionState(
     (prevState: any, formData: FormData) => registerEntryAction(tenantId, formData),
@@ -55,6 +56,7 @@ export function CheckInModal({ open, onOpenChange, tenantId }: CheckInModalProps
       onOpenChange(false);
       setPlaca("");
       setOwnerData({ name: "", phone: "", email: "", tipo: "carro", planId: "" });
+      setActiveSub(null);
     } else if (state?.error) {
       toast.error(state.error);
     }
@@ -69,16 +71,35 @@ export function CheckInModal({ open, onOpenChange, tenantId }: CheckInModalProps
       const result = await getVehicleInfoAction(tenantId, value);
       if (result.success && result.data) {
         toast.info("Vehículo reconocido");
+        
+        let planIdToSet = result.data.activeSubscription?.planId || "";
+        if (!planIdToSet) {
+           const defaultPlan = plans.find((p: any) => p.name === (result.data.tipo === 'moto' ? 'Hora Moto' : 'Hora Carro'));
+           planIdToSet = defaultPlan?.id || "";
+        }
+
         setOwnerData(prev => ({
           ...prev,
           name: result.data.ownerName || "",
           phone: result.data.ownerPhone || "",
           email: result.data.ownerEmail || "",
-          tipo: (result.data.tipo as any) || "carro"
+          tipo: (result.data.tipo as any) || "carro",
+          planId: planIdToSet
         }));
+
+        if (result.data.activeSubscription) {
+          setActiveSub(result.data.activeSubscription);
+        } else {
+          setActiveSub(null);
+        }
+
         setShowOwner(true);
+      } else {
+        setActiveSub(null);
       }
       setIsSearching(false);
+    } else {
+      setActiveSub(null);
     }
   };
 
@@ -105,6 +126,16 @@ export function CheckInModal({ open, onOpenChange, tenantId }: CheckInModalProps
               </div>
             </div>
           </div>
+
+          {activeSub && (
+            <div className="bg-primary/20 border border-primary/50 text-primary p-3 rounded-xl flex items-center gap-3 animate-in fade-in zoom-in-95">
+              <Ticket className="h-6 w-6" />
+              <div>
+                <p className="font-bold">Convenio Activo</p>
+                <p className="text-xs opacity-90">Este vehículo tiene una suscripción vigente.</p>
+              </div>
+            </div>
+          )}
           
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -122,7 +153,7 @@ export function CheckInModal({ open, onOpenChange, tenantId }: CheckInModalProps
             </div>
             <div className="space-y-2">
               <label className="text-sm font-medium">Plan de Cobro</label>
-              <Select name="planId" value={ownerData.planId} onValueChange={(v) => setOwnerData({...ownerData, planId: v})}>
+              <Select name="planId" value={ownerData.planId} onValueChange={(v) => setOwnerData({...ownerData, planId: v})} disabled={!!activeSub}>
                 <SelectTrigger className="h-11">
                   <SelectValue placeholder="Seleccione Plan" />
                 </SelectTrigger>

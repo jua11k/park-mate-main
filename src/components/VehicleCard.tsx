@@ -30,9 +30,15 @@ export const VehicleCard = ({ vehicle, onClick }: VehicleCardProps) => {
                 <h3 className="text-lg font-bold tracking-wider">{vehicle.vehicle.placa}</h3>
                 <p className="text-xs text-muted-foreground capitalize">{vehicle.vehicle.tipo}</p>
               </div>
-              <Badge variant="secondary" className="text-[10px] uppercase font-bold">
-                {vehicle.status === 'parked' ? 'En Parqueo' : vehicle.status}
-              </Badge>
+              {vehicle.status === 'subscription_active' ? (
+                <Badge className="bg-primary/20 text-primary border-primary/50 text-[10px] uppercase font-bold">
+                  Convenio Activo
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="text-[10px] uppercase font-bold">
+                  {vehicle.status === 'parked' ? 'En Parqueo' : vehicle.status}
+                </Badge>
+              )}
             </div>
             
             <div className="flex items-center justify-between text-xs text-muted-foreground">
