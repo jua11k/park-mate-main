@@ -135,3 +135,77 @@ export async function createMembershipAction(tenantId: string, formData: FormDat
   }
 }
 
+export async function importVehiclesToMembershipAction(
+  tenantId: string, 
+  data: { 
+    planId?: string;
+    startDate: string; 
+    endDate: string; 
+    totalPaid: string;
+    vehicles: any[];
+  }
+): Promise<ActionResponse<any>> {
+  try {
+    const { db } = await import("@/db");
+    const { vehicles, subscriptions } = await import("@/db/schema/parking");
+    const { eq, and } = await import("drizzle-orm");
+
+    if (!data.vehicles || data.vehicles.length === 0) {
+      return { success: false, error: "No hay vehículos para importar" };
+    }
+
+    let successCount = 0;
+
+    for (const v of data.vehicles) {
+      const placaStr = v.placa?.toString().trim().toUpperCase();
+      if (!placaStr) continue;
+
+      // Check if vehicle exists
+      let vehicle = await db.query.vehicles.findFirst({
+        where: and(
+          eq(vehicles.tenantId, tenantId),
+          eq(vehicles.placa, placaStr)
+        )
+      });
+
+      if (!vehicle) {
+        const [newVehicle] = await db.insert(vehicles).values({
+          tenantId,
+          placa: placaStr,
+          tipo: v.tipo || "carro",
+          brand: v.marca,
+          color: v.color,
+          ownerName: v.propietario,
+          ownerEmail: v.email,
+          ownerPhone: v.telefono,
+        }).returning();
+        vehicle = newVehicle;
+      } else {
+         await db.update(vehicles).set({
+           ownerName: vehicle.ownerName || v.propietario,
+           ownerEmail: vehicle.ownerEmail || v.email,
+           ownerPhone: vehicle.ownerPhone || v.telefono,
+         }).where(eq(vehicles.id, vehicle.id));
+      }
+
+      await db.insert(subscriptions).values({
+        tenantId,
+        vehicleId: vehicle.id,
+        planId: data.planId || null,
+        startDate: new Date(data.startDate),
+        endDate: new Date(data.endDate),
+        status: 'active',
+        totalPaid: data.totalPaid || "0",
+      });
+
+      successCount++;
+    }
+
+    revalidatePath("/memberships");
+    revalidatePath("/customers");
+    return { success: true, data: { count: successCount } };
+  } catch (e: any) {
+    return { success: false, error: e.message || "Error al importar vehículos" };
+  }
+}
+

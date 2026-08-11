@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, CreditCard, Plus } from "lucide-react";
 import { NewMembershipButton } from "@/components/NewMembershipButton";
+import { ImportCsvButton } from "@/components/ImportCsvButton";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -32,12 +33,15 @@ export default async function MembershipsPage() {
       />
 
       <main className="container mx-auto p-4 md:p-6 space-y-8">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-1">
             <h2 className="text-3xl font-bold tracking-tight">Gestión de Convenios</h2>
             <p className="text-muted-foreground">Administra los planes mensuales y suscripciones activas.</p>
           </div>
-          <NewMembershipButton tenantId={session.tenantId} plans={plans} vehicles={vehicles} />
+          <div className="flex items-center gap-2">
+            <ImportCsvButton tenantId={session.tenantId} plans={plans} />
+            <NewMembershipButton tenantId={session.tenantId} plans={plans} vehicles={vehicles} />
+          </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

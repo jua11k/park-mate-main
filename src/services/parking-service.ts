@@ -277,17 +277,29 @@ export async function createSubscription(tenantId: string, data: { vehicleId: st
   return sub;
 }
 
-export async function getCompletedRecords(tenantId: string) {
+export async function getCompletedRecords(tenantId: string, planId?: string) {
+  const conditions = [
+    eq(parkingRecords.tenantId, tenantId),
+    eq(parkingRecords.status, "completed")
+  ];
+  
+  if (planId) {
+    if (planId === "none") {
+      // Filter for standard/no plan records
+      conditions.push(eq(parkingRecords.planId, null as any));
+    } else {
+      conditions.push(eq(parkingRecords.planId, planId));
+    }
+  }
+
   return await db.query.parkingRecords.findMany({
-    where: and(
-      eq(parkingRecords.tenantId, tenantId),
-      eq(parkingRecords.status, "completed")
-    ),
+    where: and(...conditions),
     with: {
       vehicle: true,
       plan: true,
     },
     orderBy: [desc(parkingRecords.exitTime)],
-    limit: 100,
+    limit: planId ? 5000 : 100, // Fetch more if filtering for export
   });
 }
+

@@ -1,24 +1,29 @@
 import { getSession } from "@/actions/auth-actions";
 import { redirect } from "next/navigation";
 import { Header } from "@/components/Header";
-import { getCompletedRecords, getParkedVehicles } from "@/services/parking-service";
+import { getCompletedRecords, getParkedVehicles, getParkingPlans } from "@/services/parking-service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ExportCsvButton } from "@/components/ExportCsvButton";
 import { BarChart3, TrendingUp, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { ReportFilter } from "./ReportFilter";
 
-export default async function ReportsPage() {
+export default async function ReportsPage(props: { searchParams: Promise<{ planId?: string }> }) {
   const session = await getSession();
 
   if (!session) {
     redirect("/login");
   }
 
-  const [records, parked] = await Promise.all([
-    getCompletedRecords(session.tenantId),
-    getParkedVehicles(session.tenantId)
+  const searchParams = await props.searchParams;
+  const currentPlanId = searchParams.planId || "";
+
+  const [records, parked, plans] = await Promise.all([
+    getCompletedRecords(session.tenantId, currentPlanId),
+    getParkedVehicles(session.tenantId),
+    getParkingPlans(session.tenantId)
   ]);
 
   // Basic Metrics Calculation
@@ -39,7 +44,8 @@ export default async function ReportsPage() {
             <h2 className="text-3xl font-bold tracking-tight">Métricas y Reportes</h2>
             <p className="text-muted-foreground">Resumen financiero e historial de parqueo.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
+            <ReportFilter plans={plans} currentPlanId={currentPlanId} />
             <ExportCsvButton records={records} />
           </div>
         </div>
@@ -48,7 +54,7 @@ export default async function ReportsPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <Card className="rounded-[2rem] border-white/5 bg-white/5 shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Ingresos Totales (Histórico)</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Ingresos Filtrados</CardTitle>
               <DollarSign className="h-5 w-5 text-green-400" />
             </CardHeader>
             <CardContent>
@@ -68,7 +74,7 @@ export default async function ReportsPage() {
 
           <Card className="rounded-[2rem] border-white/5 bg-white/5 shadow-xl">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Ocupación Actual</CardTitle>
+              <CardTitle className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Ocupación Global</CardTitle>
               <TrendingUp className="h-5 w-5 text-blue-400" />
             </CardHeader>
             <CardContent>
@@ -79,7 +85,9 @@ export default async function ReportsPage() {
 
         {/* History Table */}
         <div className="space-y-4">
-          <h3 className="text-2xl font-bold">Historial de Salidas (Últimos 100)</h3>
+          <h3 className="text-2xl font-bold">
+            {currentPlanId ? `Historial Filtrado (${totalCompleted})` : "Historial de Salidas (Últimos 100)"}
+          </h3>
           
           <div className="rounded-[2rem] border border-white/5 bg-white/5 overflow-hidden shadow-xl">
             <div className="overflow-x-auto">
@@ -96,7 +104,7 @@ export default async function ReportsPage() {
                 <tbody className="divide-y divide-white/5">
                   {records.length === 0 ? (
                     <tr>
-                      <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">No hay registros de salidas aún.</td>
+                      <td colSpan={5} className="px-6 py-12 text-center text-muted-foreground">No hay registros para mostrar.</td>
                     </tr>
                   ) : (
                     records.map((r) => (
@@ -129,3 +137,4 @@ export default async function ReportsPage() {
     </div>
   );
 }
+
