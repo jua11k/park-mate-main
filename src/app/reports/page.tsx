@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { ReportFilter } from "./ReportFilter";
 
-export default async function ReportsPage(props: { searchParams: Promise<{ planId?: string }> }) {
+export default async function ReportsPage(props: { searchParams: Promise<{ planId?: string, startDate?: string, endDate?: string }> }) {
   const session = await getSession();
 
   if (!session) {
@@ -19,9 +19,11 @@ export default async function ReportsPage(props: { searchParams: Promise<{ planI
 
   const searchParams = await props.searchParams;
   const currentPlanId = searchParams.planId || "";
+  const startDate = searchParams.startDate || "";
+  const endDate = searchParams.endDate || "";
 
   const [records, parked, plans] = await Promise.all([
-    getCompletedRecords(session.tenantId, currentPlanId),
+    getCompletedRecords(session.tenantId, currentPlanId, startDate, endDate),
     getParkedVehicles(session.tenantId),
     getParkingPlans(session.tenantId)
   ]);
@@ -45,7 +47,7 @@ export default async function ReportsPage(props: { searchParams: Promise<{ planI
             <p className="text-muted-foreground">Resumen financiero e historial de parqueo.</p>
           </div>
           <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
-            <ReportFilter plans={plans} currentPlanId={currentPlanId} />
+            <ReportFilter plans={plans} currentPlanId={currentPlanId} currentStartDate={startDate} currentEndDate={endDate} />
             <ExportCsvButton records={records} />
           </div>
         </div>

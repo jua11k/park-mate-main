@@ -1,6 +1,6 @@
 import { db } from "@/db";
 import { vehicles, parkingRecords, parkingPlans, subscriptions } from "@/db/schema/parking";
-import { eq, and, desc, gt, or } from "drizzle-orm";
+import { eq, and, desc, gt, gte, lte, or } from "drizzle-orm";
 import { sendToN8n } from "./n8n-service";
 
 export async function getParkedVehicles(tenantId: string) {
@@ -264,7 +264,7 @@ export async function createPlan(tenantId: string, data: { name: string, descrip
   return plan;
 }
 
-export async function createSubscription(tenantId: string, data: { vehicleId: string, planId: string, startDate: Date, endDate: Date, totalPaid: string }) {
+export async function createSubscription(tenantId: string, data: { vehicleId: string, planId: string, startDate: Date, endDate: Date, totalPaid: string, companyOfficialEmail?: string }) {
   const [sub] = await db.insert(subscriptions).values({
     tenantId,
     vehicleId: data.vehicleId,
@@ -273,11 +273,33 @@ export async function createSubscription(tenantId: string, data: { vehicleId: st
     endDate: data.endDate,
     status: 'active',
     totalPaid: data.totalPaid,
+    companyOfficialEmail: data.companyOfficialEmail,
   }).returning();
   return sub;
 }
 
-export async function getCompletedRecords(tenantId: string, planId?: string) {
+export async function updateSubscription(tenantId: string, id: string, data: { planId?: string, endDate?: Date, totalPaid?: string, companyOfficialEmail?: string }) {
+  const [sub] = await db.update(subscriptions)
+    .set({
+      ...(data.planId !== undefined && { planId: data.planId }),
+      ...(data.endDate !== undefined && { endDate: data.endDate }),
+      ...(data.totalPaid !== undefined && { totalPaid: data.totalPaid }),
+      ...(data.companyOfficialEmail !== undefined && { companyOfficialEmail: data.companyOfficialEmail }),
+    })
+    .where(and(eq(subscriptions.id, id), eq(subscriptions.tenantId, tenantId)))
+    .returning();
+  return sub;
+}
+
+export async function cancelSubscription(tenantId: string, id: string) {
+  const [sub] = await db.update(subscriptions)
+    .set({ status: 'cancelled' })
+    .where(and(eq(subscriptions.id, id), eq(subscriptions.tenantId, tenantId)))
+    .returning();
+  return sub;
+}
+
+export async function getCompletedRecords(tenantId: string, planId?: string, startDateStr?: string, endDateStr?: string) {
   const conditions = [
     eq(parkingRecords.tenantId, tenantId),
     eq(parkingRecords.status, "completed")
@@ -292,6 +314,17 @@ export async function getCompletedRecords(tenantId: string, planId?: string) {
     }
   }
 
+  if (startDateStr) {
+    conditions.push(gte(parkingRecords.entryTime, new Date(startDateStr)));
+  }
+
+  if (endDateStr) {
+    // Add time to end of day
+    const endDate = new Date(endDateStr);
+    endDate.setHours(23, 59, 59, 999);
+    conditions.push(lte(parkingRecords.entryTime, endDate));
+  }
+
   return await db.query.parkingRecords.findMany({
     where: and(...conditions),
     with: {
@@ -299,7 +332,7 @@ export async function getCompletedRecords(tenantId: string, planId?: string) {
       plan: true,
     },
     orderBy: [desc(parkingRecords.exitTime)],
-    limit: planId ? 5000 : 100, // Fetch more if filtering for export
+    limit: (planId || startDateStr || endDateStr) ? 5000 : 100, // Fetch more if filtering for export
   });
 }
 

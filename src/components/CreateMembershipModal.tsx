@@ -134,6 +134,12 @@ export function CreateMembershipModal({ open, onOpenChange, tenantId, plans, veh
                </div>
             </div>
 
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Correo Oficial (Reportes)</label>
+              <Input name="companyOfficialEmail" type="email" placeholder="Ej: contacto@empresa.com" className="bg-white/5 border-white/10 text-white" />
+              <p className="text-xs text-muted-foreground">Opcional. Si se proporciona, los reportes se enviarán a este correo.</p>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-white/5 p-4 rounded-xl border border-white/10">
               <div className="space-y-2">
                 <label className="text-xs font-bold text-muted-foreground uppercase tracking-widest">Inicia</label>

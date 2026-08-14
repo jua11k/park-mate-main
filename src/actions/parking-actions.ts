@@ -123,9 +123,10 @@ export async function createMembershipAction(tenantId: string, formData: FormDat
     startDate: new Date(formData.get("startDate") as string),
     endDate: new Date(formData.get("endDate") as string),
     totalPaid: formData.get("totalPaid") as string,
+    companyOfficialEmail: formData.get("companyOfficialEmail") as string,
   };
 
-  if (!data.vehicleId || !data.planId || !data.startDate || !data.endDate || !data.totalPaid) {
+  if (!data.vehicleId || !data.startDate || !data.endDate || !data.totalPaid) {
     return { success: false, error: "Faltan datos obligatorios" };
   }
 
@@ -136,6 +137,35 @@ export async function createMembershipAction(tenantId: string, formData: FormDat
     return { success: true, data: sub };
   } catch (e) {
     return { success: false, error: "Error al crear el convenio" };
+  }
+}
+
+export async function updateMembershipAction(tenantId: string, id: string, formData: FormData): Promise<ActionResponse<any>> {
+  const data = {
+    planId: formData.get("planId") as string,
+    endDate: formData.get("endDate") ? new Date(formData.get("endDate") as string) : undefined,
+    totalPaid: formData.get("totalPaid") as string,
+    companyOfficialEmail: formData.get("companyOfficialEmail") as string,
+  };
+
+  try {
+    const { updateSubscription } = await import("@/services/parking-service");
+    const sub = await updateSubscription(tenantId, id, data);
+    revalidatePath("/memberships");
+    return { success: true, data: sub };
+  } catch (e) {
+    return { success: false, error: "Error al actualizar el convenio" };
+  }
+}
+
+export async function cancelMembershipAction(tenantId: string, id: string): Promise<ActionResponse<any>> {
+  try {
+    const { cancelSubscription } = await import("@/services/parking-service");
+    const sub = await cancelSubscription(tenantId, id);
+    revalidatePath("/memberships");
+    return { success: true, data: sub };
+  } catch (e) {
+    return { success: false, error: "Error al cancelar el convenio" };
   }
 }
 

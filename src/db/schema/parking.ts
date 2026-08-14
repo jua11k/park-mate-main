@@ -67,6 +67,7 @@ export const subscriptions = parkMateSchema.table("subscriptions", {
   endDate: timestamp("end_date", { withTimezone: true }).notNull(),
   status: varchar("status", { length: 50 }).default("active").notNull(),
   totalPaid: decimal("total_paid", { precision: 12, scale: 2 }).default("0").notNull(),
+  companyOfficialEmail: varchar("company_official_email", { length: 255 }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),

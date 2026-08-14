@@ -7,6 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, User, CreditCard, Plus } from "lucide-react";
 import { NewMembershipButton } from "@/components/NewMembershipButton";
+import { EditMembershipButton } from "@/components/EditMembershipButton";
 import { ImportCsvButton } from "@/components/ImportCsvButton";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -87,7 +88,7 @@ export default async function MembershipsPage() {
                   </div>
 
                   <div className="pt-4 flex gap-2">
-                    <Button variant="outline" className="flex-1 rounded-xl font-bold h-11 border-white/5">Editar</Button>
+                    <EditMembershipButton tenantId={session.tenantId} plans={plans} subscription={sub} />
                     <Button variant="outline" className="rounded-xl h-11 w-11 p-0 border-white/5">
                       <CreditCard className="h-4 w-4" />
                     </Button>
