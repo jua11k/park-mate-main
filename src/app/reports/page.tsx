@@ -4,7 +4,7 @@ import { Header } from "@/components/Header";
 import { getCompletedRecords, getParkedVehicles, getParkingPlans } from "@/services/parking-service";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ExportCsvButton } from "@/components/ExportCsvButton";
+import { ExportExcelButton } from "@/components/ExportExcelButton";
 import { BarChart3, TrendingUp, DollarSign } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -53,7 +53,7 @@ export default async function ReportsPage(props: { searchParams: Promise<{ planI
               <ReportFilter plans={plans} currentPlanId={currentPlanId} currentStartDate={startDate} currentEndDate={endDate} currentPlaca={placa} currentPlanType={planType} />
             </div>
             <div className="w-full xl:w-auto shrink-0 self-stretch flex">
-              <ExportCsvButton records={records} />
+              <ExportExcelButton records={records} />
             </div>
           </div>
         </div>

@@ -9,11 +9,11 @@ import { toast } from "sonner";
 import { Loader2, UploadCloud } from "lucide-react";
 import { addWeeks, addMonths, format } from "date-fns";
 import { es } from "date-fns/locale";
-import Papa from "papaparse";
+import * as XLSX from 'xlsx';
 
 type BillingPeriod = "semanal" | "mensual" | "bimensual" | "trimestral" | "semestral" | "personalizado";
 
-export function ImportCsvModal({ open, onOpenChange, tenantId, plans }: { open: boolean, onOpenChange: (open: boolean) => void, tenantId: string, plans: any[] }) {
+export function ImportExcelModal({ open, onOpenChange, tenantId, plans }: { open: boolean, onOpenChange: (open: boolean) => void, tenantId: string, plans: any[] }) {
   const [isPending, startTransition] = useTransition();
   const [startDate, setStartDate] = useState<string>("");
   const [billingPeriod, setBillingPeriod] = useState<BillingPeriod>("mensual");
@@ -54,7 +54,7 @@ export function ImportCsvModal({ open, onOpenChange, tenantId, plans }: { open: 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!file) {
-      toast.error("Debes seleccionar un archivo CSV");
+      toast.error("Debes seleccionar un archivo Excel");
       return;
     }
 
@@ -63,17 +63,17 @@ export function ImportCsvModal({ open, onOpenChange, tenantId, plans }: { open: 
     const totalPaid = formData.get("totalPaid") as string;
 
     startTransition(() => {
-      Papa.parse(file, {
-        header: true,
-        skipEmptyLines: true,
-        complete: async (results) => {
-          if (results.errors.length > 0) {
-            toast.error("Error al leer el CSV. Revisa el formato.");
-            return;
-          }
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        try {
+          const data = new Uint8Array(e.target?.result as ArrayBuffer);
+          const workbook = XLSX.read(data, { type: 'array' });
+          const sheetName = workbook.SheetNames[0];
+          const worksheet = workbook.Sheets[sheetName];
+          const json = XLSX.utils.sheet_to_json(worksheet);
 
           // normalize headers (lowercase)
-          const normalizedData = results.data.map((row: any) => {
+          const normalizedData = json.map((row: any) => {
             const newRow: any = {};
             for (const key in row) {
               newRow[key.toLowerCase().trim()] = row[key];
@@ -95,11 +95,11 @@ export function ImportCsvModal({ open, onOpenChange, tenantId, plans }: { open: 
           } else {
             toast.error(result.error || "Error al importar vehículos");
           }
-        },
-        error: () => {
-          toast.error("No se pudo leer el archivo CSV.");
+        } catch (err) {
+          toast.error("No se pudo leer el archivo Excel.");
         }
-      });
+      };
+      reader.readAsArrayBuffer(file);
     });
   };
 
@@ -107,7 +107,7 @@ export function ImportCsvModal({ open, onOpenChange, tenantId, plans }: { open: 
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md bg-black border border-white/10 text-white rounded-[2rem]">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold">Importar Convenio (CSV)</DialogTitle>
+          <DialogTitle className="text-2xl font-bold">Importar Convenio (Excel)</DialogTitle>
           <DialogDescription className="text-white/40">
             Carga un listado de vehículos para asociarlos en lote a un convenio.
           </DialogDescription>
@@ -116,15 +116,15 @@ export function ImportCsvModal({ open, onOpenChange, tenantId, plans }: { open: 
           <div className="space-y-4">
             
             <div className="space-y-2">
-              <label className="text-sm font-medium">Archivo CSV</label>
+              <label className="text-sm font-medium">Archivo Excel (.xlsx)</label>
               <div className="relative border-2 border-dashed border-white/10 rounded-xl p-6 flex flex-col items-center justify-center bg-white/5 hover:bg-white/10 transition-colors">
                 <UploadCloud className="h-8 w-8 text-muted-foreground mb-2" />
                 <span className="text-sm text-muted-foreground text-center">
-                  {file ? file.name : "Arrastra o selecciona tu archivo .csv"}
+                  {file ? file.name : "Arrastra o selecciona tu archivo .xlsx"}
                 </span>
                 <input 
                   type="file" 
-                  accept=".csv" 
+                  accept=".xlsx, .xls" 
                   required
                   onChange={(e) => setFile(e.target.files?.[0] || null)}
                   className="absolute inset-0 opacity-0 cursor-pointer"

@@ -9,7 +9,7 @@ import { Calendar, User, CreditCard, Plus, Briefcase } from "lucide-react";
 import { NewMembershipButton } from "@/components/NewMembershipButton";
 import { EditMembershipButton } from "@/components/EditMembershipButton";
 import { EditConvenioButton } from "@/components/EditConvenioButton";
-import { ImportCsvButton } from "@/components/ImportCsvButton";
+import { ImportExcelButton } from "@/components/ImportExcelButton";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -44,7 +44,7 @@ export default async function MembershipsPage() {
           </div>
           <div className="flex flex-col sm:flex-row items-center gap-2 w-full md:w-auto">
             <div className="w-full sm:w-auto">
-              <ImportCsvButton tenantId={session.tenantId} plans={plans} />
+              <ImportExcelButton tenantId={session.tenantId} plans={plans} />
             </div>
             <div className="w-full sm:w-auto">
               <NewMembershipButton tenantId={session.tenantId} plans={plans} vehicles={vehicles} />
