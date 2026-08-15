@@ -1,6 +1,7 @@
 "use client";
 
-import { RefreshCw, Car, LayoutDashboard, Calendar, Settings, LogOut } from 'lucide-react';
+import { useState } from 'react';
+import { RefreshCw, Car, LayoutDashboard, Calendar, Settings, LogOut, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { logoutAction } from '@/actions/auth-actions';
@@ -13,6 +14,7 @@ interface HeaderProps {
 
 export const Header = ({ vehicleCount, tenantName }: HeaderProps) => {
   const router = useRouter();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logoutAction();
@@ -72,11 +74,61 @@ export const Header = ({ vehicleCount, tenantName }: HeaderProps) => {
             <span className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold">Ocupación</span>
             <span className="text-sm font-black">{vehicleCount} Vehículos</span>
           </div>
-          <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-destructive transition-colors" onClick={handleLogout}>
+          <Button variant="ghost" size="icon" className="rounded-full text-muted-foreground hover:text-destructive transition-colors hidden md:flex" onClick={handleLogout}>
             <LogOut className="h-5 w-5" />
+          </Button>
+
+          {/* Mobile Menu Toggle */}
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            className="md:hidden" 
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          >
+            {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>
         </div>
       </div>
+
+      {/* Mobile Nav */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden border-t bg-background px-4 py-4 space-y-2 absolute w-full shadow-lg shadow-black/5">
+          <Button variant="ghost" asChild className="w-full justify-start gap-2 font-semibold" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link href="/dashboard">
+              <LayoutDashboard className="h-4 w-4" />
+              Panel
+            </Link>
+          </Button>
+          <Button variant="ghost" asChild className="w-full justify-start gap-2 font-semibold" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link href="/reports">
+              <RefreshCw className="h-4 w-4" />
+              Reportes
+            </Link>
+          </Button>
+          <Button variant="ghost" asChild className="w-full justify-start gap-2 font-semibold" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link href="/customers">
+              <Car className="h-4 w-4" />
+              Clientes
+            </Link>
+          </Button>
+          <Button variant="ghost" asChild className="w-full justify-start gap-2 font-semibold" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link href="/memberships">
+              <Calendar className="h-4 w-4" />
+              Convenios
+            </Link>
+          </Button>
+          <Button variant="ghost" asChild className="w-full justify-start gap-2 font-semibold" onClick={() => setIsMobileMenuOpen(false)}>
+            <Link href="/plans">
+              <Settings className="h-4 w-4" />
+              Tarifas
+            </Link>
+          </Button>
+          <Button variant="ghost" className="w-full justify-start gap-2 font-semibold text-destructive hover:text-destructive" onClick={handleLogout}>
+            <LogOut className="h-4 w-4" />
+            Cerrar Sesión
+          </Button>
+        </div>
+      )}
     </header>
   );
 };
