@@ -35,7 +35,7 @@ export function ExportCsvButton({ records }: { records: any[] }) {
   };
 
   return (
-    <Button onClick={handleExport} variant="outline" className="w-full sm:w-auto h-12 rounded-xl font-bold gap-2 border-white/10 bg-white/5 hover:bg-white/10 text-white hover:text-white">
+    <Button onClick={handleExport} variant="outline" className="w-full h-full min-h-[3rem] rounded-xl font-bold gap-2 border-white/10 bg-white/5 hover:bg-white/10 text-white hover:text-white">
       <Download className="h-4 w-4" />
       Exportar CSV
     </Button>

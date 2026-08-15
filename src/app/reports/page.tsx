@@ -48,9 +48,11 @@ export default async function ReportsPage(props: { searchParams: Promise<{ planI
             <h2 className="text-3xl font-bold tracking-tight">Métricas y Reportes</h2>
             <p className="text-muted-foreground">Resumen financiero e historial de parqueo.</p>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full xl:w-auto">
-            <ReportFilter plans={plans} currentPlanId={currentPlanId} currentStartDate={startDate} currentEndDate={endDate} currentPlaca={placa} currentPlanType={planType} />
-            <div className="self-end xl:self-auto">
+          <div className="flex flex-col xl:flex-row xl:items-stretch gap-2 w-full">
+            <div className="flex-1 w-full">
+              <ReportFilter plans={plans} currentPlanId={currentPlanId} currentStartDate={startDate} currentEndDate={endDate} currentPlaca={placa} currentPlanType={planType} />
+            </div>
+            <div className="w-full xl:w-auto shrink-0 self-stretch flex">
               <ExportCsvButton records={records} />
             </div>
           </div>
