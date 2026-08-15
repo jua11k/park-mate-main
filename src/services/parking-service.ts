@@ -370,13 +370,14 @@ export async function getCompletedRecords(tenantId: string, planId?: string, sta
   }
 
   if (startDateStr) {
-    conditions.push(gte(parkingRecords.entryTime, new Date(startDateStr)));
+    // Treat the date string as midnight Colombia time (UTC-5)
+    const startDate = new Date(`${startDateStr}T00:00:00-05:00`);
+    conditions.push(gte(parkingRecords.entryTime, startDate));
   }
 
   if (endDateStr) {
-    // Add time to end of day
-    const endDate = new Date(endDateStr);
-    endDate.setHours(23, 59, 59, 999);
+    // Treat the date string as end of day Colombia time (UTC-5)
+    const endDate = new Date(`${endDateStr}T23:59:59.999-05:00`);
     conditions.push(lte(parkingRecords.entryTime, endDate));
   }
 
