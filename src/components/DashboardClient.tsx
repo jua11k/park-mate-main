@@ -39,7 +39,11 @@ export function DashboardClient({ vehicles, tenantId }: DashboardClientProps) {
           <p className="text-muted-foreground">Gestiona los ingresos y salidas en tiempo real.</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setIsCheckInOpen(true)} className="h-12 px-6 rounded-xl font-bold gap-2 shadow-lg shadow-primary/20">
+          <Button onClick={() => handleCheckOut("")} variant="outline" className="h-12 px-6 rounded-xl font-bold gap-2 border-white/10 hover:bg-white/10">
+            <LogOut className="h-5 w-5" />
+            Registrar Salida
+          </Button>
+          <Button onClick={() => setIsCheckInOpen(true)} className="h-12 px-6 rounded-xl font-bold gap-2 shadow-lg shadow-primary/20 bg-primary text-black hover:bg-primary/90">
             <Plus className="h-5 w-5" />
             Nuevo Ingreso
           </Button>
@@ -143,7 +147,7 @@ export function DashboardClient({ vehicles, tenantId }: DashboardClientProps) {
         open={isCheckOutOpen}
         onOpenChange={setIsCheckOutOpen}
         tenantId={tenantId}
-        placa={selectedPlaca}
+        initialPlaca={selectedPlaca}
       />
     </main>
   );
