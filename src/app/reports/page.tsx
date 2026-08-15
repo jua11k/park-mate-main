@@ -10,7 +10,7 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { ReportFilter } from "./ReportFilter";
 
-export default async function ReportsPage(props: { searchParams: Promise<{ planId?: string, startDate?: string, endDate?: string }> }) {
+export default async function ReportsPage(props: { searchParams: Promise<{ planId?: string, startDate?: string, endDate?: string, placa?: string, planType?: string }> }) {
   const session = await getSession();
 
   if (!session) {
@@ -21,9 +21,11 @@ export default async function ReportsPage(props: { searchParams: Promise<{ planI
   const currentPlanId = searchParams.planId || "";
   const startDate = searchParams.startDate || "";
   const endDate = searchParams.endDate || "";
+  const placa = searchParams.placa || "";
+  const planType = searchParams.planType || "";
 
   const [records, parked, plans] = await Promise.all([
-    getCompletedRecords(session.tenantId, currentPlanId, startDate, endDate),
+    getCompletedRecords(session.tenantId, currentPlanId, startDate, endDate, placa, planType),
     getParkedVehicles(session.tenantId),
     getParkingPlans(session.tenantId)
   ]);
@@ -41,14 +43,16 @@ export default async function ReportsPage(props: { searchParams: Promise<{ planI
       />
 
       <main className="container mx-auto p-4 md:p-6 space-y-8">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
           <div className="space-y-1">
             <h2 className="text-3xl font-bold tracking-tight">Métricas y Reportes</h2>
             <p className="text-muted-foreground">Resumen financiero e historial de parqueo.</p>
           </div>
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full md:w-auto">
-            <ReportFilter plans={plans} currentPlanId={currentPlanId} currentStartDate={startDate} currentEndDate={endDate} />
-            <ExportCsvButton records={records} />
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full xl:w-auto">
+            <ReportFilter plans={plans} currentPlanId={currentPlanId} currentStartDate={startDate} currentEndDate={endDate} currentPlaca={placa} currentPlanType={planType} />
+            <div className="self-end xl:self-auto">
+              <ExportCsvButton records={records} />
+            </div>
           </div>
         </div>
 

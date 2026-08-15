@@ -354,7 +354,7 @@ export async function cancelSubscription(tenantId: string, id: string) {
   return sub;
 }
 
-export async function getCompletedRecords(tenantId: string, planId?: string, startDateStr?: string, endDateStr?: string) {
+export async function getCompletedRecords(tenantId: string, planId?: string, startDateStr?: string, endDateStr?: string, placa?: string, planType?: string) {
   const conditions = [
     eq(parkingRecords.tenantId, tenantId),
     eq(parkingRecords.status, "completed")
@@ -380,14 +380,33 @@ export async function getCompletedRecords(tenantId: string, planId?: string, sta
     conditions.push(lte(parkingRecords.entryTime, endDate));
   }
 
-  return await db.query.parkingRecords.findMany({
+  // To filter by placa or planType, we'll fetch more records and filter in JS if complex, 
+  // but we can join with vehicles and plans natively in drizzle.
+  // Actually, we can fetch all matching the top conditions and filter in memory since limit is 5000, 
+  // or we can use drizzle's subqueries. For simplicity, we filter in memory here.
+  const records = await db.query.parkingRecords.findMany({
     where: and(...conditions),
     with: {
       vehicle: true,
       plan: true,
     },
     orderBy: [desc(parkingRecords.exitTime)],
-    limit: (planId || startDateStr || endDateStr) ? 5000 : 100, // Fetch more if filtering for export
+    limit: (planId || startDateStr || endDateStr || placa || planType) ? 5000 : 100, // Fetch more if filtering for export
+  });
+
+  return records.filter(r => {
+    let match = true;
+    if (placa) {
+      match = match && r.vehicle?.placa.toLowerCase().includes(placa.toLowerCase());
+    }
+    if (planType) {
+      if (planType === 'convenio') {
+        match = match && r.plan?.type === 'convenio';
+      } else if (planType === 'standard') {
+        match = match && (!r.plan || r.plan.type !== 'convenio');
+      }
+    }
+    return match;
   });
 }
 
