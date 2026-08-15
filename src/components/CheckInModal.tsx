@@ -131,8 +131,8 @@ export function CheckInModal({ open, onOpenChange, tenantId }: CheckInModalProps
             <div className="bg-primary/20 border border-primary/50 text-primary p-3 rounded-xl flex items-center gap-3 animate-in fade-in zoom-in-95">
               <Ticket className="h-6 w-6" />
               <div>
-                <p className="font-bold">Convenio Activo</p>
-                <p className="text-xs opacity-90">Este vehículo tiene una suscripción vigente.</p>
+                <p className="font-bold">Vehículo asociado a convenio</p>
+                <p className="text-xs font-bold mt-1 text-white opacity-90">{activeSub.plan?.name || "Convenio Activo"}</p>
               </div>
             </div>
           )}

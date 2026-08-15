@@ -53,6 +53,9 @@ export async function getActiveSubscription(tenantId: string, vehicleId: string)
       eq(subscriptions.status, "active"),
       gt(subscriptions.endDate, new Date())
     ),
+    with: {
+      plan: true
+    }
   });
 }
 
@@ -116,9 +119,42 @@ export async function registerEntry(tenantId: string, data: {
   let status = "parked";
 
   // Check for active subscription
-  const activeSub = await getActiveSubscription(tenantId, vehicle.id);
+  let activeSub = await getActiveSubscription(tenantId, vehicle.id);
+  
+  // If a specific plan is chosen and we don't have an active sub for it
+  if (planId && !activeSub) {
+    const chosenPlan = await db.query.parkingPlans.findFirst({
+      where: and(
+        eq(parkingPlans.tenantId, tenantId),
+        eq(parkingPlans.id, planId)
+      )
+    });
+
+    if (chosenPlan && chosenPlan.type === 'convenio') {
+      // Auto-associate vehicle to convenio
+      // Use the plan's endDate if it has one, otherwise default to +10 years
+      let endDate = chosenPlan.endDate;
+      if (!endDate) {
+        endDate = new Date();
+        endDate.setFullYear(endDate.getFullYear() + 10);
+      }
+      
+      const [newSub] = await db.insert(subscriptions).values({
+        tenantId,
+        vehicleId: vehicle.id,
+        planId: chosenPlan.id,
+        endDate,
+        totalPaid: "0",
+        status: "active"
+      }).returning();
+      
+      activeSub = newSub;
+    }
+  }
+
   if (activeSub) {
     status = "subscription_active";
+    planId = activeSub.planId;
   }
   
   if (!planId && !activeSub) {
@@ -253,13 +289,16 @@ export async function getAllVehicles(tenantId: string) {
   });
 }
 
-export async function createPlan(tenantId: string, data: { name: string, description: string, type: string, price: string }) {
+export async function createPlan(tenantId: string, data: { name: string, description: string, type: string, price: string, companyOfficialEmail?: string, startDate?: Date, endDate?: Date }) {
   const [plan] = await db.insert(parkingPlans).values({
     tenantId,
     name: data.name,
     description: data.description,
     type: data.type,
     price: data.price,
+    companyOfficialEmail: data.companyOfficialEmail,
+    startDate: data.startDate,
+    endDate: data.endDate,
   }).returning();
   return plan;
 }

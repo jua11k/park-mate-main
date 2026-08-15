@@ -100,6 +100,9 @@ export async function createPlanAction(tenantId: string, formData: FormData): Pr
     description: formData.get("description") as string,
     type: formData.get("type") as string,
     price: formData.get("price") as string,
+    companyOfficialEmail: formData.get("companyOfficialEmail") as string,
+    startDate: formData.get("startDate") ? new Date(formData.get("startDate") as string) : undefined,
+    endDate: formData.get("endDate") ? new Date(formData.get("endDate") as string) : undefined,
   };
 
   if (!data.name || !data.type || !data.price) {
@@ -110,9 +113,10 @@ export async function createPlanAction(tenantId: string, formData: FormData): Pr
     const { createPlan } = await import("@/services/parking-service");
     const plan = await createPlan(tenantId, data);
     revalidatePath("/plans");
+    revalidatePath("/memberships");
     return { success: true, data: plan };
   } catch (e) {
-    return { success: false, error: "Error al crear la tarifa" };
+    return { success: false, error: "Error al crear la tarifa o convenio" };
   }
 }
 

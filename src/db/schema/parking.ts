@@ -29,8 +29,11 @@ export const parkingPlans = parkMateSchema.table("parking_plans", {
   projectId: uuid("project_id").references(() => projects.id),
   name: varchar("name", { length: 100 }).notNull(), // Hora, Día, Mes, Convenio
   price: decimal("price", { precision: 12, scale: 2 }).notNull(),
-  type: varchar("type", { length: 20 }).notNull(), // 'hourly', 'daily', 'fixed'
+  type: varchar("type", { length: 20 }).notNull(), // 'hourly', 'daily', 'fixed', 'convenio'
   description: text("description"),
+  companyOfficialEmail: varchar("company_official_email", { length: 255 }),
+  startDate: timestamp("start_date", { withTimezone: true }),
+  endDate: timestamp("end_date", { withTimezone: true }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   deletedAt: timestamp("deleted_at"),
@@ -67,7 +70,6 @@ export const subscriptions = parkMateSchema.table("subscriptions", {
   endDate: timestamp("end_date", { withTimezone: true }).notNull(),
   status: varchar("status", { length: 50 }).default("active").notNull(),
   totalPaid: decimal("total_paid", { precision: 12, scale: 2 }).default("0").notNull(),
-  companyOfficialEmail: varchar("company_official_email", { length: 255 }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
   deletedAt: timestamp("deleted_at", { withTimezone: true }),
