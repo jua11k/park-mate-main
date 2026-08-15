@@ -303,6 +303,22 @@ export async function createPlan(tenantId: string, data: { name: string, descrip
   return plan;
 }
 
+export async function updatePlan(tenantId: string, id: string, data: { name?: string, description?: string, price?: string, companyOfficialEmail?: string, startDate?: Date, endDate?: Date }) {
+  const [plan] = await db.update(parkingPlans)
+    .set({
+      name: data.name,
+      description: data.description,
+      price: data.price,
+      companyOfficialEmail: data.companyOfficialEmail,
+      startDate: data.startDate,
+      endDate: data.endDate,
+      updatedAt: new Date()
+    })
+    .where(and(eq(parkingPlans.id, id), eq(parkingPlans.tenantId, tenantId)))
+    .returning();
+  return plan;
+}
+
 export async function createSubscription(tenantId: string, data: { vehicleId: string, planId: string, startDate: Date, endDate: Date, totalPaid: string, companyOfficialEmail?: string }) {
   const [sub] = await db.insert(subscriptions).values({
     tenantId,

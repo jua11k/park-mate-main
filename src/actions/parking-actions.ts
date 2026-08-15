@@ -120,6 +120,27 @@ export async function createPlanAction(tenantId: string, formData: FormData): Pr
   }
 }
 
+export async function updatePlanAction(tenantId: string, id: string, formData: FormData): Promise<ActionResponse<any>> {
+  const data = {
+    name: formData.get("name") as string,
+    description: formData.get("description") as string,
+    price: formData.get("price") as string,
+    companyOfficialEmail: formData.get("companyOfficialEmail") as string,
+    startDate: formData.get("startDate") ? new Date(formData.get("startDate") as string) : undefined,
+    endDate: formData.get("endDate") ? new Date(formData.get("endDate") as string) : undefined,
+  };
+
+  try {
+    const { updatePlan } = await import("@/services/parking-service");
+    const plan = await updatePlan(tenantId, id, data);
+    revalidatePath("/plans");
+    revalidatePath("/memberships");
+    return { success: true, data: plan };
+  } catch (e) {
+    return { success: false, error: "Error al actualizar el convenio" };
+  }
+}
+
 export async function createMembershipAction(tenantId: string, formData: FormData): Promise<ActionResponse<any>> {
   const data = {
     vehicleId: formData.get("vehicleId") as string,
