@@ -315,7 +315,7 @@ export async function getAllVehicles(tenantId: string) {
   });
 }
 
-export async function createPlan(tenantId: string, data: { name: string, description: string, type: string, price: string, companyOfficialEmail?: string, startDate?: Date, endDate?: Date }) {
+export async function createPlan(tenantId: string, data: { name: string, description: string, type: string, price: string, companyOfficialEmail?: string, startDate?: Date, endDate?: Date, gracePeriodMin?: number, differentialRatePrice?: string | null, differentialRateAfterHr?: number | null }) {
   const [plan] = await db.insert(parkingPlans).values({
     tenantId,
     name: data.name,
@@ -325,11 +325,14 @@ export async function createPlan(tenantId: string, data: { name: string, descrip
     companyOfficialEmail: data.companyOfficialEmail,
     startDate: data.startDate,
     endDate: data.endDate,
+    gracePeriodMin: data.gracePeriodMin,
+    differentialRatePrice: data.differentialRatePrice,
+    differentialRateAfterHr: data.differentialRateAfterHr,
   }).returning();
   return plan;
 }
 
-export async function updatePlan(tenantId: string, id: string, data: { name?: string, description?: string, price?: string, companyOfficialEmail?: string, startDate?: Date, endDate?: Date }) {
+export async function updatePlan(tenantId: string, id: string, data: { name?: string, description?: string, price?: string, companyOfficialEmail?: string, startDate?: Date, endDate?: Date, gracePeriodMin?: number, differentialRatePrice?: string | null, differentialRateAfterHr?: number | null }) {
   const [plan] = await db.update(parkingPlans)
     .set({
       name: data.name,
@@ -338,6 +341,9 @@ export async function updatePlan(tenantId: string, id: string, data: { name?: st
       companyOfficialEmail: data.companyOfficialEmail,
       startDate: data.startDate,
       endDate: data.endDate,
+      gracePeriodMin: data.gracePeriodMin,
+      differentialRatePrice: data.differentialRatePrice,
+      differentialRateAfterHr: data.differentialRateAfterHr,
       updatedAt: new Date()
     })
     .where(and(eq(parkingPlans.id, id), eq(parkingPlans.tenantId, tenantId)))
