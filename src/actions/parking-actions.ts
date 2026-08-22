@@ -14,10 +14,10 @@ type ActionResponse<T> = {
 const entrySchema = z.object({
   placa: z.string().min(1, "La placa es obligatoria").trim().toUpperCase(),
   tipo: z.string().min(1, "El tipo de vehículo es obligatorio"),
-  planId: z.string().optional(),
-  ownerName: z.string().optional(),
-  ownerEmail: z.string().email("Correo inválido").optional().or(z.literal("")),
-  ownerPhone: z.string().optional(),
+  planId: z.string().nullable().optional(),
+  ownerName: z.string().nullable().optional(),
+  ownerEmail: z.string().email("Correo inválido").nullable().optional().or(z.literal("")),
+  ownerPhone: z.string().nullable().optional(),
 });
 
 export async function registerEntryAction(tenantId: string, formData: FormData): Promise<ActionResponse<any>> {
@@ -43,7 +43,10 @@ export async function registerEntryAction(tenantId: string, formData: FormData):
   try {
     const result = await registerEntry(tenantId, {
       ...validated.data,
+      planId: validated.data.planId || undefined,
+      ownerName: validated.data.ownerName || undefined,
       ownerEmail: validated.data.ownerEmail || undefined,
+      ownerPhone: validated.data.ownerPhone || undefined,
     });
     revalidatePath("/");
     return { success: true, data: result };
