@@ -10,6 +10,7 @@ import { useRouter } from 'next/navigation';
 interface HeaderProps {
   vehicleCount: number;
   tenantName: string;
+  tenantSlug?: string;
 }
 
 export const Header = ({ vehicleCount, tenantName }: HeaderProps) => {

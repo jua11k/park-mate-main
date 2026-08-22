@@ -4,13 +4,9 @@ import { useState, useTransition } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { createPlanAction } from "@/actions/auth-actions";
+import { createPlanAction } from "@/actions/parking-actions";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-
-// Wait, createPlanAction is in parking-actions.ts, not auth-actions!
-// I'll import from parking-actions instead.
-import { createPlanAction as createPlan } from "@/actions/parking-actions";
 
 export function CreatePlanModal({ open, onOpenChange, tenantId }: { open: boolean, onOpenChange: (open: boolean) => void, tenantId: string }) {
   const [isPending, startTransition] = useTransition();
@@ -20,7 +16,7 @@ export function CreatePlanModal({ open, onOpenChange, tenantId }: { open: boolea
     const formData = new FormData(e.currentTarget);
     
     startTransition(async () => {
-      const result = await createPlan(tenantId, formData);
+      const result = await createPlanAction(tenantId, formData);
       if (result.success) {
         toast.success("Tarifa creada con éxito");
         onOpenChange(false);

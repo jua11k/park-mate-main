@@ -148,13 +148,13 @@ export async function registerEntry(tenantId: string, data: {
         status: "active"
       }).returning();
       
-      activeSub = newSub;
+      activeSub = newSub as any;
     }
   }
 
   if (activeSub) {
     status = "subscription_active";
-    planId = activeSub.planId;
+    planId = activeSub.planId || undefined;
   }
   
   if (!planId && !activeSub) {
@@ -176,11 +176,14 @@ export async function registerEntry(tenantId: string, data: {
   }).returning();
 
   // 3. Notify n8n
-  await sendToN8n('parking_entry', {
-    recordId: result.id,
-    placa: vehicle.placa,
-    entryTime: result.entryTime,
-    tenantId
+  await sendToN8n({
+    tenantId,
+    eventType: 'parking_entry', 
+    data: {
+      recordId: result.id,
+      placa: vehicle.placa,
+      entryTime: result.entryTime,
+    }
   });
 
   return result;
@@ -242,13 +245,17 @@ export async function registerExit(tenantId: string, placa: string) {
     .returning();
 
   // 5. Notify n8n
-  await sendToN8n('parking_exit', {
-    ...updatedRecord,
-    placa: vehicle.placa,
-    ownerData: {
-      name: vehicle.ownerName,
-      email: vehicle.ownerEmail,
-      phone: vehicle.ownerPhone
+  await sendToN8n({
+    tenantId,
+    eventType: 'parking_exit', 
+    data: {
+      ...updatedRecord,
+      placa: vehicle.placa,
+      ownerData: {
+        name: vehicle.ownerName,
+        email: vehicle.ownerEmail,
+        phone: vehicle.ownerPhone
+      }
     }
   });
 
@@ -351,7 +358,7 @@ export async function updatePlan(tenantId: string, id: string, data: { name?: st
   return plan;
 }
 
-export async function createSubscription(tenantId: string, data: { vehicleId: string, planId: string, startDate: Date, endDate: Date, totalPaid: string, companyOfficialEmail?: string }) {
+export async function createSubscription(tenantId: string, data: { vehicleId: string, planId: string, startDate: Date, endDate: Date, totalPaid: string }) {
   const [sub] = await db.insert(subscriptions).values({
     tenantId,
     vehicleId: data.vehicleId,
@@ -360,18 +367,16 @@ export async function createSubscription(tenantId: string, data: { vehicleId: st
     endDate: data.endDate,
     status: 'active',
     totalPaid: data.totalPaid,
-    companyOfficialEmail: data.companyOfficialEmail,
   }).returning();
   return sub;
 }
 
-export async function updateSubscription(tenantId: string, id: string, data: { planId?: string, endDate?: Date, totalPaid?: string, companyOfficialEmail?: string }) {
+export async function updateSubscription(tenantId: string, id: string, data: { planId?: string, endDate?: Date, totalPaid?: string }) {
   const [sub] = await db.update(subscriptions)
     .set({
       ...(data.planId !== undefined && { planId: data.planId }),
       ...(data.endDate !== undefined && { endDate: data.endDate }),
       ...(data.totalPaid !== undefined && { totalPaid: data.totalPaid }),
-      ...(data.companyOfficialEmail !== undefined && { companyOfficialEmail: data.companyOfficialEmail }),
     })
     .where(and(eq(subscriptions.id, id), eq(subscriptions.tenantId, tenantId)))
     .returning();
