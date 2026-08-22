@@ -64,6 +64,21 @@ export function CreatePlanModal({ open, onOpenChange, tenantId }: { open: boolea
               <label className="text-sm font-medium">Precio ($)</label>
               <Input name="price" type="number" step="0.01" required placeholder="Ej: 2000" className="bg-white/5 border-white/10" />
             </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tiempo de Gracia (minutos)</label>
+              <Input name="gracePeriodMin" type="number" placeholder="Ej: 15" className="bg-white/5 border-white/10" />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tarifa Diferencial ($) (Opcional)</label>
+              <Input name="differentialRatePrice" type="number" step="0.01" placeholder="Ej: 1500" className="bg-white/5 border-white/10" />
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">A partir de (horas)</label>
+              <Input name="differentialRateAfterHr" type="number" placeholder="Ej: 2" className="bg-white/5 border-white/10" />
+            </div>
           </div>
           
           <Button type="submit" disabled={isPending} className="w-full h-12 font-bold rounded-xl">

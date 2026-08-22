@@ -103,6 +103,9 @@ export async function createPlanAction(tenantId: string, formData: FormData): Pr
     companyOfficialEmail: formData.get("companyOfficialEmail") as string,
     startDate: formData.get("startDate") ? new Date(formData.get("startDate") as string) : undefined,
     endDate: formData.get("endDate") ? new Date(formData.get("endDate") as string) : undefined,
+    gracePeriodMin: formData.get("gracePeriodMin") ? parseInt(formData.get("gracePeriodMin") as string) : 0,
+    differentialRatePrice: formData.get("differentialRatePrice") as string | null,
+    differentialRateAfterHr: formData.get("differentialRateAfterHr") ? parseInt(formData.get("differentialRateAfterHr") as string) : null,
   };
 
   if (!data.name || !data.type || !data.price) {
@@ -128,6 +131,9 @@ export async function updatePlanAction(tenantId: string, id: string, formData: F
     companyOfficialEmail: formData.get("companyOfficialEmail") as string,
     startDate: formData.get("startDate") ? new Date(formData.get("startDate") as string) : undefined,
     endDate: formData.get("endDate") ? new Date(formData.get("endDate") as string) : undefined,
+    gracePeriodMin: formData.get("gracePeriodMin") ? parseInt(formData.get("gracePeriodMin") as string) : 0,
+    differentialRatePrice: formData.get("differentialRatePrice") as string | null,
+    differentialRateAfterHr: formData.get("differentialRateAfterHr") ? parseInt(formData.get("differentialRateAfterHr") as string) : null,
   };
 
   try {

@@ -224,7 +224,10 @@ export async function registerExit(tenantId: string, placa: string) {
       targetedRecord.entryTime,
       exitTime,
       targetedRecord.plan.price,
-      targetedRecord.plan.type
+      targetedRecord.plan.type,
+      targetedRecord.plan.gracePeriodMin,
+      targetedRecord.plan.differentialRatePrice,
+      targetedRecord.plan.differentialRateAfterHr
     );
   }
 
@@ -252,9 +255,23 @@ export async function registerExit(tenantId: string, placa: string) {
   return updatedRecord;
 }
 
-function calculateAmount(entry: Date, exit: Date, priceStr: string, type: string): string {
-  const price = parseFloat(priceStr);
+function calculateAmount(
+  entry: Date, 
+  exit: Date, 
+  priceStr: string, 
+  type: string,
+  gracePeriodMin: number | null = 0,
+  differentialRatePrice: string | null = null,
+  differentialRateAfterHr: number | null = null
+): string {
   const diffMs = exit.getTime() - entry.getTime();
+
+  // Grace Period Logic
+  if (gracePeriodMin && gracePeriodMin > 0 && diffMs <= gracePeriodMin * 60 * 1000) {
+    return "0.00";
+  }
+
+  const price = parseFloat(priceStr);
   const diffHours = diffMs / (1000 * 60 * 60);
 
   if (type === 'fixed') return price.toFixed(2);
@@ -265,10 +282,19 @@ function calculateAmount(entry: Date, exit: Date, priceStr: string, type: string
   }
 
   // Hourly (Default)
-  // Logic: First hour is always paid full, then by fractional hour or rounded up?
-  // Most parking garages round up each hour.
-  const hoursToCharge = Math.ceil(diffHours);
-  return (Math.max(1, hoursToCharge) * price).toFixed(2);
+  const hoursToCharge = Math.max(1, Math.ceil(diffHours));
+
+  // Differential Rate Logic
+  if (differentialRateAfterHr && differentialRatePrice && hoursToCharge > differentialRateAfterHr) {
+    const baseHours = differentialRateAfterHr;
+    const extraHours = hoursToCharge - differentialRateAfterHr;
+    const diffPrice = parseFloat(differentialRatePrice);
+    
+    const total = (baseHours * price) + (extraHours * diffPrice);
+    return total.toFixed(2);
+  }
+
+  return (hoursToCharge * price).toFixed(2);
 }
 
 export async function getSubscriptions(tenantId: string) {

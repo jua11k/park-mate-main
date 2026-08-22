@@ -12,19 +12,46 @@ const { tenants } = tenantsSchema;
 const { vehicles, parkingRecords, parkingPlans } = parkingSchema;
 
 // Helper duplicated from parking-service for testing
-function calculateAmount(entryTime: Date, exitTime: Date, planPrice: string, planType: string) {
-  const diffMs = exitTime.getTime() - entryTime.getTime();
-  const price = parseFloat(planPrice);
+function calculateAmount(
+  entry: Date, 
+  exit: Date, 
+  priceStr: string, 
+  type: string,
+  gracePeriodMin: number | null = 0,
+  differentialRatePrice: string | null = null,
+  differentialRateAfterHr: number | null = null
+): string {
+  const diffMs = exit.getTime() - entry.getTime();
+
+  // Grace Period Logic
+  if (gracePeriodMin && gracePeriodMin > 0 && diffMs <= gracePeriodMin * 60 * 1000) {
+    return "0.00";
+  }
+
+  const price = parseFloat(priceStr);
+  const diffHours = diffMs / (1000 * 60 * 60);
+
+  if (type === 'fixed') return price.toFixed(2);
   
-  if (planType === 'hourly') {
-    const hours = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60)));
-    return (hours * price).toFixed(2);
-  } else if (planType === 'daily') {
-    const days = Math.max(1, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+  if (type === 'daily') {
+    const days = Math.ceil(diffHours / 24);
     return (days * price).toFixed(2);
   }
-  
-  return price.toFixed(2);
+
+  // Hourly (Default)
+  const hoursToCharge = Math.max(1, Math.ceil(diffHours));
+
+  // Differential Rate Logic
+  if (differentialRateAfterHr && differentialRatePrice && hoursToCharge > differentialRateAfterHr) {
+    const baseHours = differentialRateAfterHr;
+    const extraHours = hoursToCharge - differentialRateAfterHr;
+    const diffPrice = parseFloat(differentialRatePrice);
+    
+    const total = (baseHours * price) + (extraHours * diffPrice);
+    return total.toFixed(2);
+  }
+
+  return (hoursToCharge * price).toFixed(2);
 }
 
 async function test() {
@@ -63,7 +90,10 @@ async function test() {
       targetedRecord.entryTime,
       exitTime,
       targetedRecord.plan.price,
-      targetedRecord.plan.type
+      targetedRecord.plan.type,
+      targetedRecord.plan.gracePeriodMin,
+      targetedRecord.plan.differentialRatePrice,
+      targetedRecord.plan.differentialRateAfterHr
     );
   }
 
